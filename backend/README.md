@@ -1,106 +1,199 @@
-# Fish Pond AI Chatbot — Backend
+# Fish Pond AI Chatbot — AI-Assisted Aquaculture Monitoring System
 
-FastAPI + Gemini 1.5 Flash (free tier) backend for the fish pond management chatbot.
+An AI-powered fish pond monitoring and decision-support system built using FastAPI, React, and Groq LLM integration.
 
-## Folder Structure
+This project simulates real-time IoT pond telemetry and converts raw sensor data into conversational, farmer-friendly insights using an AI assistant.
 
+---
+
+# Features
+
+- AI-assisted pond health monitoring
+- Real-time simulated IoT sensor telemetry
+- Conversational fish farming assistant
+- Deterministic pond risk analysis engine
+- Low-latency Groq LLM integration
+- Session-based conversation memory
+- Modern React monitoring dashboard
+- Multi-pond support
+- Token-efficient AI prompting
+- Backend-agnostic architecture
+
+---
+
+# System Architecture
+
+```text
+React Frontend
+       ↓
+FastAPI Backend
+       ↓
+Risk Analysis Engine (Python)
+       ↓
+Groq LLM (Llama 3.1)
 ```
-backend/
-├── main.py            # FastAPI app + all routes
-├── ai_engine.py       # Gemini API integration + session memory
-├── mock_sensors.py    # Simulated IoT sensor data (swap for real API in prod)
-├── requirements.txt
-├── .env.example       # Copy to .env and add your key
+
+The system separates:
+- deterministic pond analysis (Python)
+- conversational explanation (LLM)
+
+This reduces hallucinations and improves reliability.
+
+---
+
+# Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React + CSS |
+| Backend | FastAPI |
+| AI Provider | Groq |
+| AI Model | llama-3.1-8b-instant |
+| Language | Python |
+| Communication | REST API |
+| Sensor Layer | Simulated IoT Telemetry |
+
+---
+
+# Folder Structure
+
+```text
+Fish_Pond_AI_Chatbot/
+│
+├── backend/
+│   ├── main.py
+│   ├── ai_engine.py
+│   ├── mock_sensors.py
+│   ├── risk_engine.py
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── README.md
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.js
+│
 └── README.md
 ```
 
-## Setup
+---
 
-**1. Install dependencies**
+# Backend Features
+
+## AI Engine
+- Groq API integration
+- Session-aware chat memory
+- Token-efficient prompting
+- Structured AI responses
+
+## Risk Engine
+Deterministic pond analysis for:
+- oxygen risk
+- ammonia toxicity
+- unsafe pH
+- overall pond health
+
+## Mock Sensor Layer
+Simulates:
+- pH
+- dissolved oxygen
+- ammonia
+- algae
+- nitrite
+- turbidity
+- temperature
+
+Can be replaced directly with real IoT APIs.
+
+---
+
+# Frontend Features
+
+- Real-time pond dashboard
+- AI chatbot interface
+- Pond selector
+- Live sensor cards
+- SAFE / RISK indicators
+- Token + latency metrics
+- Suggested quick prompts
+- Independent dashboard scrolling
+
+---
+
+# Setup Instructions
+
+# 1. Clone Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/FishAndPond.git
+cd FishAndPond
+```
+
+---
+
+# 2. Backend Setup
+
+```bash
+cd backend
+```
+
+## Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+## Activate Virtual Environment
+
+### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+### Linux / Mac
+
+```bash
+source venv/bin/activate
+```
+
+---
+
+## Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-**2. Set up your API key**
-```bash
-cp .env.example .env
-# Edit .env and add your Gemini API key
-# Get free key from: https://aistudio.google.com/app/apikey
+---
+
+# 3. Configure Environment Variables
+
+Create `.env`
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
-**3. Run the server**
+Get Groq API key from:
+
+https://console.groq.com/
+
+---
+
+# 4. Run Backend
+
 ```bash
 uvicorn main:app --reload --port 8000
 ```
 
-**4. Test it**
-```bash
-# Health check
-curl http://localhost:8000/health
+Backend runs on:
 
-# Get pond sensor data
-curl http://localhost:8000/ponds/pond_1
-
-# Send a chat message
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Is the pH safe for my fish?", "pond_id": "pond_1"}'
+```text
+http://localhost:8000
 ```
 
-## API Endpoints
+---
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| GET | `/ponds` | All ponds with live sensor data |
-| GET | `/ponds/{pond_id}` | Single pond sensor data |
-| POST | `/chat` | Main chat endpoint |
-| DELETE | `/session/{session_id}` | Clear chat history |
-
-## Chat Request Example
-
-```json
-{
-  "message": "Can I add 500 new fish to this pond today?",
-  "pond_id": "pond_1",
-  "session_id": null
-}
-```
-
-## Chat Response Example
-
-```json
-{
-  "reply": "⚠️ CAUTION — Not ideal today. Ammonia is at 0.6 ppm (above safe 0.5 ppm limit), which can stress new fish. Temperature at 31°C is also slightly high. Wait 1–2 days, increase aeration, and recheck ammonia before stocking.",
-  "session_id": "abc123",
-  "pond_id": "pond_1",
-  "latency_ms": 980,
-  "token_usage": { "prompt_tokens": 210, "completion_tokens": 68, "total_tokens": 278 },
-  "sensor_snapshot": { ... }
-}
-```
-
-## Switching AI Provider (Production)
-
-In `ai_engine.py`, only replace `call_gemini()`:
-
-```python
-# Swap to Claude
-import anthropic
-def call_gemini(system_prompt, history, user_message):
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    # ... Claude API call here
-    return { "reply": ..., "latency_ms": ..., "token_usage": ... }
-```
-
-## Connecting Real IoT Data (Production)
-
-In `mock_sensors.py`, replace `get_pond_data()`:
-
-```python
-def get_pond_data(pond_id: str):
-    response = requests.get(f"https://your-dotnet-api.com/ponds/{pond_id}/sensors")
-    return response.json()  # Must return same keys
-```
-
-**Nothing else changes.**
